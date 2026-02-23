@@ -111,6 +111,11 @@ WHAM prototype benchmark (Python vs legacy C):
 python scripts/benchmark_wham_stage.py --threshold 0.15 --timeout 120
 ```
 
+Medium-stage readiness evaluation (speed + parity):
+```bash
+python scripts/evaluate_medium_stage_feasibility.py --threshold 0.15 --timeout 120
+```
+
 ### Lint, format, type-check
 Black (`line-length = 100`):
 ```bash

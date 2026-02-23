@@ -46,6 +46,12 @@ Benchmark experimental WHAM prototype vs C WHAM:
 python scripts/benchmark_wham_stage.py --threshold 0.15 --timeout 120
 ```
 
+Evaluate medium-stage migration readiness (speed + parity):
+
+```bash
+python scripts/evaluate_medium_stage_feasibility.py --threshold 0.15 --timeout 120
+```
+
 Experimental secondary stage invocation:
 
 ```bash
