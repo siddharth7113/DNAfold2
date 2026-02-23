@@ -34,6 +34,18 @@ Benchmark Python vs C stage tools (15% threshold example):
 python scripts/benchmark_stage_tools.py --stop-after initial --threshold 0.15 --timeout 180
 ```
 
+Benchmark experimental secondary prototype vs C secondary:
+
+```bash
+python scripts/benchmark_secondary_stage.py --threshold 0.15 --timeout 120
+```
+
+Experimental secondary stage invocation:
+
+```bash
+dnafold2 fold --sequence ATCCTAGTTATAGGAT --output results_quick --quick-test --stop-after secondary --experimental-python-secondary
+```
+
 ## Regression policy
 
 - Deterministic stages: exact output comparisons are preferred.

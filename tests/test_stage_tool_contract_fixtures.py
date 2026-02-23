@@ -10,6 +10,7 @@ from dnafold2.stage_tools import (
     convert_conf_to_pdb,
     extract_min_conformations,
     generate_initial_ch_dat,
+    run_secondary_structure_prototype,
 )
 
 
@@ -47,3 +48,13 @@ def test_pdb_convert_contract_fixture(tmp_path: Path) -> None:
 
     expected = (src / "expected_cf.pdb").read_text()
     assert out_file.read_text() == expected
+
+
+@pytest.mark.contract
+def test_secondary_prototype_contract_fixture(tmp_path: Path) -> None:
+    src = FIXTURE_ROOT / "secondary_prototype"
+
+    run_secondary_structure_prototype(src / "CG.pdb", tmp_path)
+
+    expected = (src / "expected_sec_struc.dat").read_text()
+    assert (tmp_path / "sec_struc.dat").read_text() == expected

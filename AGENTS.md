@@ -101,6 +101,11 @@ Stage tool benchmark (Python vs legacy C, 15% threshold):
 python scripts/benchmark_stage_tools.py --stop-after initial --threshold 0.15 --timeout 180
 ```
 
+Secondary prototype benchmark (Python vs legacy C):
+```bash
+python scripts/benchmark_secondary_stage.py --threshold 0.15 --timeout 120
+```
+
 ### Lint, format, type-check
 Black (`line-length = 100`):
 ```bash

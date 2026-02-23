@@ -18,7 +18,12 @@ from typing import List, Optional
 from datetime import datetime
 
 from .config import FoldingConfig, validate_sequence
-from .stage_tools import convert_conf_to_pdb, extract_min_conformations, generate_initial_ch_dat
+from .stage_tools import (
+    convert_conf_to_pdb,
+    extract_min_conformations,
+    generate_initial_ch_dat,
+    run_secondary_structure_prototype,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -140,6 +145,7 @@ class DNAFolder:
         skip_rebuild: bool = False,
         skip_wham: bool = False,
         use_python_stage_tools: bool = True,
+        experimental_python_secondary: bool = False,
     ) -> FoldingResult:
         """Fold a DNA sequence to predict its 3D structure.
 
@@ -224,6 +230,7 @@ class DNAFolder:
                 skip_rebuild=skip_rebuild,
                 skip_wham=skip_wham,
                 use_python_stage_tools=use_python_stage_tools,
+                experimental_python_secondary=experimental_python_secondary,
             )
 
             # Collect results
@@ -345,6 +352,7 @@ class DNAFolder:
         skip_rebuild: bool = False,
         skip_wham: bool = False,
         use_python_stage_tools: bool = True,
+        experimental_python_secondary: bool = False,
     ) -> None:
         """Execute the folding pipeline.
 
@@ -611,14 +619,18 @@ class DNAFolder:
                 if src.exists():
                     shutil.copy2(src, rebuild_dir / f_name)
 
-            logger.info("Compiling secondary.c...")
-            run_cmd(
-                ["gcc", "-Wall", "secondary.c", "-o", "secondary", "-lm"],
-                rebuild_dir,
-                "Compile secondary",
-            )
-            logger.info("Running secondary structure prediction...")
-            run_cmd(["./secondary"], rebuild_dir, "Run secondary")
+            if experimental_python_secondary:
+                logger.info("Running experimental Python secondary prototype...")
+                run_secondary_structure_prototype(rebuild_dir / "CG.pdb", rebuild_dir)
+            else:
+                logger.info("Compiling secondary.c...")
+                run_cmd(
+                    ["gcc", "-Wall", "secondary.c", "-o", "secondary", "-lm"],
+                    rebuild_dir,
+                    "Compile secondary",
+                )
+                logger.info("Running secondary structure prediction...")
+                run_cmd(["./secondary"], rebuild_dir, "Run secondary")
 
             # Check outputs
             if (rebuild_dir / "sec_struc.dat").exists():
@@ -1067,6 +1079,7 @@ def fold(
     skip_rebuild: bool = False,
     skip_wham: bool = False,
     use_python_stage_tools: bool = True,
+    experimental_python_secondary: bool = False,
 ) -> FoldingResult:
     """Convenience function to fold a DNA sequence.
 
@@ -1088,4 +1101,5 @@ def fold(
         skip_rebuild=skip_rebuild,
         skip_wham=skip_wham,
         use_python_stage_tools=use_python_stage_tools,
+        experimental_python_secondary=experimental_python_secondary,
     )

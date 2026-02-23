@@ -186,3 +186,43 @@ def convert_conf_to_pdb(conf_file: str | Path, output_file: str | Path) -> None:
 
         fh.write("TER\n")
         fh.write("END\n")
+
+
+def run_secondary_structure_prototype(cg_pdb: str | Path, output_dir: str | Path) -> None:
+    """Write experimental secondary-structure outputs from CG PDB.
+
+    This function is intentionally conservative and contract-focused:
+    it emits a deterministic placeholder secondary structure for rapid
+    testing/benchmarking of a Python secondary stage integration path.
+
+    Output format (`sec_struc.dat`):
+        line 1: sequence inferred from residue names
+        line 2: dot-bracket string (all unpaired)
+    """
+    pdb_path = Path(cg_pdb)
+    out_dir = Path(output_dir)
+    out_dir.mkdir(parents=True, exist_ok=True)
+
+    residues: list[tuple[int, str]] = []
+    seen: set[int] = set()
+    for line in pdb_path.read_text().splitlines():
+        if not line.startswith("ATOM"):
+            continue
+        if len(line) < 26:
+            continue
+        residue_name = line[17:20].strip().upper()
+        residue_index_text = line[22:26].strip()
+        if not residue_index_text:
+            continue
+        residue_index = int(residue_index_text)
+        if residue_index in seen:
+            continue
+        seen.add(residue_index)
+        base = residue_name[0] if residue_name in {"A", "T", "C", "G"} else "N"
+        residues.append((residue_index, base))
+
+    residues.sort(key=lambda item: item[0])
+    sequence = "".join(base for _, base in residues)
+    structure = "." * len(sequence)
+
+    (out_dir / "sec_struc.dat").write_text(f"{sequence}\n{structure}\n")
