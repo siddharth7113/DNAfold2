@@ -23,6 +23,7 @@ from .stage_tools import (
     extract_min_conformations,
     generate_initial_ch_dat,
     run_secondary_structure_prototype,
+    run_wham_prototype,
 )
 
 logger = logging.getLogger(__name__)
@@ -146,6 +147,7 @@ class DNAFolder:
         skip_wham: bool = False,
         use_python_stage_tools: bool = True,
         experimental_python_secondary: bool = False,
+        experimental_python_wham: bool = False,
     ) -> FoldingResult:
         """Fold a DNA sequence to predict its 3D structure.
 
@@ -231,6 +233,7 @@ class DNAFolder:
                 skip_wham=skip_wham,
                 use_python_stage_tools=use_python_stage_tools,
                 experimental_python_secondary=experimental_python_secondary,
+                experimental_python_wham=experimental_python_wham,
             )
 
             # Collect results
@@ -353,6 +356,7 @@ class DNAFolder:
         skip_wham: bool = False,
         use_python_stage_tools: bool = True,
         experimental_python_secondary: bool = False,
+        experimental_python_wham: bool = False,
     ) -> None:
         """Execute the folding pipeline.
 
@@ -824,12 +828,18 @@ class DNAFolder:
                 logger.debug("Copied %d Energy files to wham/fragment/", len(energy_files))
 
                 if len(energy_files) > 0:
-                    logger.info("Compiling wham.c...")
-                    run_cmd(
-                        ["gcc", "-Wall", "wham.c", "-o", "wham", "-lm"], wham_dir, "Compile wham"
-                    )
-                    logger.info("Running WHAM thermal stability analysis...")
-                    run_cmd(["./wham"], wham_dir, "Run wham")
+                    if experimental_python_wham:
+                        logger.info("Running experimental Python thermal-stability prototype...")
+                        run_wham_prototype(frag_dir, wham_dir)
+                    else:
+                        logger.info("Compiling wham.c...")
+                        run_cmd(
+                            ["gcc", "-Wall", "wham.c", "-o", "wham", "-lm"],
+                            wham_dir,
+                            "Compile wham",
+                        )
+                        logger.info("Running WHAM thermal stability analysis...")
+                        run_cmd(["./wham"], wham_dir, "Run wham")
 
                     if (wham_dir / "thermal_stability.dat").exists():
                         logger.info("Thermal stability analysis completed")
@@ -1080,6 +1090,7 @@ def fold(
     skip_wham: bool = False,
     use_python_stage_tools: bool = True,
     experimental_python_secondary: bool = False,
+    experimental_python_wham: bool = False,
 ) -> FoldingResult:
     """Convenience function to fold a DNA sequence.
 
@@ -1102,4 +1113,5 @@ def fold(
         skip_wham=skip_wham,
         use_python_stage_tools=use_python_stage_tools,
         experimental_python_secondary=experimental_python_secondary,
+        experimental_python_wham=experimental_python_wham,
     )

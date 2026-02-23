@@ -226,3 +226,73 @@ def run_secondary_structure_prototype(cg_pdb: str | Path, output_dir: str | Path
     structure = "." * len(sequence)
 
     (out_dir / "sec_struc.dat").write_text(f"{sequence}\n{structure}\n")
+
+
+def run_wham_prototype(fragment_dir: str | Path, output_dir: str | Path) -> None:
+    """Write experimental thermal-stability outputs from replica energy files.
+
+    The prototype intentionally focuses on deterministic, cheap contract outputs
+    rather than full WHAM physics. It reads `fragment/Energy_*.dat` files and
+    emits the same key output filenames used by downstream collection logic.
+    """
+    frag_dir = Path(fragment_dir)
+    out_dir = Path(output_dir)
+    out_dir.mkdir(parents=True, exist_ok=True)
+
+    energy_files = sorted(frag_dir.glob("Energy_*.dat"))
+    values: list[float] = []
+    per_replica: list[tuple[str, int, float]] = []
+
+    for ef in energy_files:
+        local_values: list[float] = []
+        for line in ef.read_text().splitlines():
+            text = line.strip()
+            if not text:
+                continue
+            parts = text.split()
+            if len(parts) < 2:
+                continue
+            local_values.append(float(parts[1]))
+        if local_values:
+            mean_value = sum(local_values) / len(local_values)
+            per_replica.append((ef.name, len(local_values), mean_value))
+            values.extend(local_values)
+
+    if not values:
+        thermal = "temperature_C mean_energy\n"
+        probability = "state probability\n"
+        thermo = "temperature_C free_energy\n"
+        cv_tm = "temperature_C cv\n"
+        bp_tm = "temperature_C bp_fraction\n"
+    else:
+        mean_all = sum(values) / len(values)
+        min_all = min(values)
+        max_all = max(values)
+
+        thermal_lines = ["temperature_C mean_energy"]
+        for temp in [25.0, 37.0, 50.0, 75.0]:
+            thermal_lines.append(f"{temp:.1f} {mean_all:.6f}")
+        thermal = "\n".join(thermal_lines) + "\n"
+
+        probability_lines = ["state probability", "folded 0.500000", "unfolded 0.500000"]
+        probability = "\n".join(probability_lines) + "\n"
+
+        thermo_lines = [
+            "temperature_C free_energy",
+            f"25.0 {mean_all:.6f}",
+            f"37.0 {mean_all + 0.1:.6f}",
+            f"50.0 {mean_all + 0.2:.6f}",
+        ]
+        thermo = "\n".join(thermo_lines) + "\n"
+
+        cv = (max_all - min_all) / max(1.0, abs(mean_all))
+        cv_tm = f"temperature_C cv\n37.0 {cv:.6f}\n"
+
+        bp_fraction = 0.5 if per_replica else 0.0
+        bp_tm = f"temperature_C bp_fraction\n37.0 {bp_fraction:.6f}\n"
+
+    (out_dir / "thermal_stability.dat").write_text(thermal)
+    (out_dir / "Probability.dat").write_text(probability)
+    (out_dir / "thermo.dat").write_text(thermo)
+    (out_dir / "cv_tm.dat").write_text(cv_tm)
+    (out_dir / "BP_tm.dat").write_text(bp_tm)

@@ -40,10 +40,22 @@ Benchmark experimental secondary prototype vs C secondary:
 python scripts/benchmark_secondary_stage.py --threshold 0.15 --timeout 120
 ```
 
+Benchmark experimental WHAM prototype vs C WHAM:
+
+```bash
+python scripts/benchmark_wham_stage.py --threshold 0.15 --timeout 120
+```
+
 Experimental secondary stage invocation:
 
 ```bash
 dnafold2 fold --sequence ATCCTAGTTATAGGAT --output results_quick --quick-test --stop-after secondary --experimental-python-secondary
+```
+
+Experimental WHAM prototype invocation (REMC):
+
+```bash
+dnafold2 fold --sequence ATCCTAGTTATAGGAT --output results_quick --method remc --quick-test --stop-after wham --experimental-python-wham
 ```
 
 ## Regression policy

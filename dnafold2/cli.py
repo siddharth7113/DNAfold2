@@ -127,6 +127,11 @@ Examples:
         help="Use experimental Python secondary-structure prototype",
     )
     fold_parser.add_argument(
+        "--experimental-python-wham",
+        action="store_true",
+        help="Use experimental Python thermal-stability prototype",
+    )
+    fold_parser.add_argument(
         "--verbose",
         action="store_true",
         help="Enable verbose logging (equivalent to --log-level DEBUG)",
@@ -209,6 +214,7 @@ def cmd_fold(args: argparse.Namespace) -> int:
     skip_wham = args.skip_wham
     use_python_stage_tools = not args.use_c_stage_tools
     experimental_python_secondary = args.experimental_python_secondary
+    experimental_python_wham = args.experimental_python_wham
 
     if args.quick_test:
         config.folding_steps = min(config.folding_steps, 2000)
@@ -245,6 +251,7 @@ def cmd_fold(args: argparse.Namespace) -> int:
             skip_wham=skip_wham,
             use_python_stage_tools=use_python_stage_tools,
             experimental_python_secondary=experimental_python_secondary,
+            experimental_python_wham=experimental_python_wham,
         )
 
         logger.info("Results saved to: %s", result.output_dir)

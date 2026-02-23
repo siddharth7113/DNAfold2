@@ -106,6 +106,11 @@ Secondary prototype benchmark (Python vs legacy C):
 python scripts/benchmark_secondary_stage.py --threshold 0.15 --timeout 120
 ```
 
+WHAM prototype benchmark (Python vs legacy C):
+```bash
+python scripts/benchmark_wham_stage.py --threshold 0.15 --timeout 120
+```
+
 ### Lint, format, type-check
 Black (`line-length = 100`):
 ```bash
