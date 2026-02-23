@@ -79,7 +79,8 @@ def extract_min_conformations(
     """Extract low-energy conformations listed in ``min.dat``.
 
     This is a Python replacement for ``src/scoring/A_state.c``.
-    ``min.dat`` is treated as 1-based conformation indices.
+    ``min.dat`` follows the legacy C utility behavior and is treated as
+    zero-based conformation indices.
     """
     n_beads = len([line for line in Path(ch_file).read_text().splitlines() if line.strip()])
     if n_beads <= 0:
@@ -100,10 +101,10 @@ def extract_min_conformations(
 
     n_blocks = len(conf_lines) // n_beads
     out_lines: list[str] = []
-    for block_index in range(1, n_blocks + 1):
+    for block_index in range(n_blocks):
         if block_index not in min_indices:
             continue
-        start = (block_index - 1) * n_beads
+        start = block_index * n_beads
         end = start + n_beads
         out_lines.extend(conf_lines[start:end])
 
@@ -140,14 +141,23 @@ def convert_conf_to_pdb(conf_file: str | Path, output_file: str | Path) -> None:
         out_path.write_text("")
         return
 
+    parsed_rows = [_parse_conformation_line(line) for line in lines]
+
+    conf_residue: dict[int, str] = {}
+    for conf_id, _atom_id, bead_type, *_ in parsed_rows:
+        if conf_id in conf_residue:
+            continue
+        conf_residue[conf_id] = "A"
+    for conf_id, _atom_id, bead_type, *_ in parsed_rows:
+        if bead_type in {"A", "T", "C", "G"}:
+            conf_residue[conf_id] = bead_type
+
     serial = 1
     prev_conf_id: int | None = None
 
     with out_path.open("w", encoding="utf-8") as fh:
         fh.write("CRYST1    0.000    0.000    0.000  90.00  90.00  90.00 P 1           1\n")
-        for raw in lines:
-            conf_id, atom_id, bead_type, x, y, z, _r, _q, _f = _parse_conformation_line(raw)
-
+        for conf_id, atom_id, bead_type, x, y, z, _r, _q, _f in parsed_rows:
             if prev_conf_id is None:
                 prev_conf_id = conf_id
             elif conf_id != prev_conf_id:
@@ -157,7 +167,7 @@ def convert_conf_to_pdb(conf_file: str | Path, output_file: str | Path) -> None:
                 prev_conf_id = conf_id
 
             atom_name = _atom_name_from_bead_type(bead_type)
-            residue_name = bead_type if bead_type in {"A", "T", "C", "G"} else "A"
+            residue_name = conf_residue.get(conf_id, "A")
             residue_index = max(1, (atom_id + 2) // 3)
             fh.write(
                 "{:<6}{:>5}  {:<3} {:>3} {:1}{:>4}    {:>8.3f}{:>8.3f}{:>8.3f}\n".format(
