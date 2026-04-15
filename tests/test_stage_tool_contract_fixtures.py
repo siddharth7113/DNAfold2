@@ -10,6 +10,8 @@ from dnafold2.stage_tools import (
     convert_conf_to_pdb,
     extract_min_conformations,
     generate_initial_ch_dat,
+    run_secondary_structure_prototype,
+    run_wham_prototype,
 )
 
 
@@ -47,3 +49,30 @@ def test_pdb_convert_contract_fixture(tmp_path: Path) -> None:
 
     expected = (src / "expected_cf.pdb").read_text()
     assert out_file.read_text() == expected
+
+
+@pytest.mark.contract
+def test_secondary_prototype_contract_fixture(tmp_path: Path) -> None:
+    src = FIXTURE_ROOT / "secondary_prototype"
+
+    run_secondary_structure_prototype(src / "CG.pdb", tmp_path)
+
+    expected = (src / "expected_sec_struc.dat").read_text()
+    assert (tmp_path / "sec_struc.dat").read_text() == expected
+
+
+@pytest.mark.contract
+def test_wham_prototype_contract_fixture(tmp_path: Path) -> None:
+    src = FIXTURE_ROOT / "wham_prototype"
+
+    run_wham_prototype(src / "fragment", tmp_path)
+
+    assert (tmp_path / "thermal_stability.dat").read_text() == (
+        src / "expected_thermal_stability.dat"
+    ).read_text()
+    assert (tmp_path / "Probability.dat").read_text() == (
+        src / "expected_Probability.dat"
+    ).read_text()
+    assert (tmp_path / "thermo.dat").read_text() == (src / "expected_thermo.dat").read_text()
+    assert (tmp_path / "cv_tm.dat").read_text() == (src / "expected_cv_tm.dat").read_text()
+    assert (tmp_path / "BP_tm.dat").read_text() == (src / "expected_BP_tm.dat").read_text()

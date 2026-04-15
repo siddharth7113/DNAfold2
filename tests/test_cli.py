@@ -57,6 +57,8 @@ class TestCLI:
                 "--skip-rebuild",
                 "--skip-wham",
                 "--use-c-stage-tools",
+                "--experimental-python-secondary",
+                "--experimental-python-wham",
             ]
         )
         assert args.quick_test is True
@@ -64,6 +66,8 @@ class TestCLI:
         assert args.skip_rebuild is True
         assert args.skip_wham is True
         assert args.use_c_stage_tools is True
+        assert args.experimental_python_secondary is True
+        assert args.experimental_python_wham is True
 
     def test_fold_stop_after_initial(self):
         """Test stop-after initial stage choice."""

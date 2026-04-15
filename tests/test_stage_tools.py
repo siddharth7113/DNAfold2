@@ -50,7 +50,7 @@ def test_extract_min_conformations_selects_requested_blocks(tmp_path: Path) -> N
     output_file = tmp_path / "min_conf.dat"
 
     ch_file.write_text("1 1 P 0 0 0 1 2 3\n2 1 S 0 0 0 1 2 3\n3 1 A 0 0 0 1 2 3\n")
-    min_file.write_text("2\n")
+    min_file.write_text("1\n")
 
     conf_file.write_text(
         "\n".join(
