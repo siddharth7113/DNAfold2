@@ -1,0 +1,80 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "dnafold2"
+version = "2.0.0"
+description = "Ab initio prediction of complex DNA structure folding using coarse-grained models"
+readme = "README.md"
+license = {text = "GPL-3.0"}
+authors = [
+    {name = "Xunxun Wang", email = "wang@example.com"},
+    {name = "Ya-Zhou Shi"}
+]
+requires-python = ">=3.9"
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
+    "Operating System :: POSIX :: Linux",
+    "Operating System :: MacOS",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Scientific/Engineering :: Bio-Informatics",
+    "Topic :: Scientific/Engineering :: Chemistry",
+]
+keywords = ["DNA", "structure prediction", "coarse-grained", "molecular modeling", "bioinformatics"]
+
+dependencies = [
+    "biopython>=1.81",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0",
+    "pytest-cov",
+    "black",
+    "ruff",
+    "mypy",
+]
+
+[project.scripts]
+dnafold2 = "dnafold2.cli:main"
+
+[project.urls]
+Homepage = "https://github.com/your-org/DNAfold2"
+Documentation = "https://github.com/your-org/DNAfold2#readme"
+Repository = "https://github.com/your-org/DNAfold2"
+Issues = "https://github.com/your-org/DNAfold2/issues"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["dnafold2*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+addopts = "-v --tb=short"
+markers = [
+    "unit: fast deterministic unit tests",
+    "contract: fixture-based stage contract tests",
+    "smoke: short end-to-end smoke checks",
+    "slow: long-running tests excluded by default",
+]
+
+[tool.black]
+line-length = 100
+target-version = ["py39", "py310", "py311", "py312"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py39"
+
+[tool.mypy]
+python_version = "3.9"
+warn_return_any = true
+warn_unused_ignores = true
